@@ -16,7 +16,7 @@ func Test_runServers(t *testing.T) {
 	}
 	runServers(address)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 
 	for i := 0; i < 10; i++ {
 		addr := address[i%len(address)]

@@ -101,7 +101,7 @@ func doLog(writer logWriter, callerBack int, level string, messages ...interface
 		case fmt.Stringer:
 			sb.WriteString(msg.(fmt.Stringer).String())
 		default:
-			sb.WriteString(fmt.Sprintf("%v", msg))
+			sb.WriteString(fmt.Sprintf("%+v", msg))
 		}
 	}
 	sb.WriteString("\n")
