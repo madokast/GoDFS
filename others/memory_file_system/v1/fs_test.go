@@ -1,4 +1,4 @@
-package memory_file_system
+package v1
 
 import (
 	"github.com/madokast/GoDFS/utils/logger"
@@ -8,7 +8,7 @@ import (
 func TestMemFileSystem_CreateFile(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, int64(len("好好学习")))
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func TestMemFileSystem_CreateFile(t *testing.T) {
 func TestMemFileSystem_Stat(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, int64(len("好好学习")))
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func TestMemFileSystem_RenameFile(t *testing.T) {
 	name := "/a/b/1.txt"
 	name2 := "/a/b/2.txt"
 
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, int64(len("好好学习")))
 	if err != nil {
 		panic(err)
 	}

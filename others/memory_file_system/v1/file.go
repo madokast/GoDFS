@@ -1,4 +1,4 @@
-package memory_file_system
+package v1
 
 import (
 	"errors"

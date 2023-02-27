@@ -1,4 +1,4 @@
-package memory_file_system
+package v1
 
 import (
 	"errors"
@@ -6,12 +6,12 @@ import (
 	"strings"
 )
 
-func (m *MemFileSystem) CreateFile(name string) (ifile.FileIO, error) {
+func (m *MemFileSystem) CreateFile(name string, size int64) (ifile.FileIO, error) {
 	_, ok := m.fileData[name]
 	if ok {
 		return nil, errors.New("File " + name + " already exists")
 	}
-	bytes := make([]byte, 0)
+	bytes := make([]byte, size)
 	m.fileData[name] = bytes
 	return &MemFile{data: bytes, fullName: name, local: 0, fs: m}, nil
 }
@@ -61,7 +61,7 @@ func (m *MemFileSystem) DeleteDirectory(string) error {
 	panic("implement me")
 }
 
-func (m *MemFileSystem) DeleteDirectories(string) error {
+func (m *MemFileSystem) DeleteDirectoryAll(string) error {
 	panic("implement me")
 }
 

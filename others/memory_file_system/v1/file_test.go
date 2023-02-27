@@ -1,4 +1,4 @@
-package memory_file_system
+package v1
 
 import (
 	"github.com/madokast/GoDFS/utils/logger"
@@ -8,7 +8,7 @@ import (
 func TestMemFile_Offset(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, 4)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func TestMemFile_Offset(t *testing.T) {
 func TestMemFile_Offset2(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, 4)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +92,7 @@ func TestMemFile_Offset2(t *testing.T) {
 func TestMemFile_Offset3(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, 4)
 	if err != nil {
 		panic(err)
 	}
@@ -134,7 +134,7 @@ func TestMemFile_Offset3(t *testing.T) {
 func TestMemFile_Offset4(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name)
+	file, err := fs.CreateFile(name, 5)
 	if err != nil {
 		panic(err)
 	}
