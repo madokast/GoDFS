@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-func (m *MemFileSystem) CreateFile(name string, size int64) (ifile.FileIO, error) {
+func (m *MemFileSystem) CreateFile(name string, size int64) error {
 	_, ok := m.fileData[name]
 	if ok {
-		return nil, errors.New("File " + name + " already exists")
+		return errors.New("File " + name + " already exists")
 	}
 	bytes := make([]byte, size)
 	m.fileData[name] = bytes
-	return &MemFile{data: bytes, fullName: name, local: 0, fs: m}, nil
+	return nil
 }
 
-func (m *MemFileSystem) OpenFile(name string) (ifile.FileIO, error) {
+func (m *MemFileSystem) OpenFile(name string, _ bool) (ifile.FileIO, error) {
 	data, ok := m.fileData[name]
 	if !ok {
 		return nil, errors.New("File " + name + " does not exist")
@@ -65,17 +65,22 @@ func (m *MemFileSystem) DeleteDirectoryAll(string) error {
 	panic("implement me")
 }
 
-func (m *MemFileSystem) ReadDirectory(dir string) ([]ifile.FileMeta, error) {
+func (m *MemFileSystem) Exist(string) bool {
+	panic("implement me")
+}
+
+func (m *MemFileSystem) ReadDirectory(dir string) ([]string, []string, error) {
 	stat, err := m.Stat(dir)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !stat.IsDirectory() {
-		return nil, errors.New(dir + " is not a dir")
+		return nil, nil, errors.New(dir + " is not a dir")
 	}
 
 	dirLen := len(dir)
-	files := make([]ifile.FileMeta, 0)
+	files := make([]string, 0)
+	dirs := make([]string, 0)
 	for file := range m.fileData {
 		if len(file) > dirLen+1 && file[dirLen] == '/' && strings.HasPrefix(file, dir) {
 			sub := file[dirLen:]
@@ -84,14 +89,18 @@ func (m *MemFileSystem) ReadDirectory(dir string) ([]ifile.FileMeta, error) {
 				if err != nil {
 					panic(err)
 				}
-				files = append(files, stat)
+				if stat.IsDirectory() {
+					dirs = append(dirs, stat.FullName())
+				} else {
+					files = append(files, stat.FullName())
+				}
 			}
 		}
 	}
-	return files, nil
+	return files, dirs, nil
 }
 
-func (m *MemFileSystem) RenameDirectory(string, string) error {
+func (m *MemFileSystem) RenameDirectory() error {
 	panic("implement me")
 }
 

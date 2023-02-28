@@ -8,7 +8,11 @@ import (
 func TestMemFileSystem_CreateFile(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name, int64(len("好好学习")))
+	err := fs.CreateFile(name, int64(len("好好学习")))
+	if err != nil {
+		panic(err)
+	}
+	file, err := fs.OpenFile(name, true)
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +25,7 @@ func TestMemFileSystem_CreateFile(t *testing.T) {
 		panic(err)
 	}
 
-	file, err = fs.OpenFile(name)
+	file, err = fs.OpenFile(name, true)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +39,7 @@ func TestMemFileSystem_CreateFile(t *testing.T) {
 func TestMemFileSystem_Stat(t *testing.T) {
 	fs := NewMemFS()
 	name := "/a/b/1.txt"
-	file, err := fs.CreateFile(name, int64(len("好好学习")))
+	err := fs.CreateFile(name, int64(len("好好学习")))
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +49,10 @@ func TestMemFileSystem_Stat(t *testing.T) {
 		panic(err)
 	}
 	logger.Info(name, stat)
-
+	file, err := fs.OpenFile(name, true)
+	if err != nil {
+		panic(err)
+	}
 	_, err = file.Write([]byte("好好学习"))
 	if err != nil {
 		panic(err)
@@ -55,7 +62,7 @@ func TestMemFileSystem_Stat(t *testing.T) {
 		panic(err)
 	}
 
-	file, err = fs.OpenFile(name)
+	file, err = fs.OpenFile(name, true)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +95,11 @@ func TestMemFileSystem_RenameFile(t *testing.T) {
 	name := "/a/b/1.txt"
 	name2 := "/a/b/2.txt"
 
-	file, err := fs.CreateFile(name, int64(len("好好学习")))
+	err := fs.CreateFile(name, int64(len("好好学习")))
+	if err != nil {
+		panic(err)
+	}
+	file, err := fs.OpenFile(name, true)
 	if err != nil {
 		panic(err)
 	}
@@ -116,7 +127,7 @@ func TestMemFileSystem_RenameFile(t *testing.T) {
 	logger.Info(fs.Stat(name))
 	logger.Info(fs.Stat(name2))
 
-	file, err = fs.OpenFile(name2)
+	file, err = fs.OpenFile(name2, true)
 	if err != nil {
 		panic(err)
 	}
