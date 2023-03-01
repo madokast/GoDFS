@@ -2,7 +2,7 @@ package v1
 
 import (
 	"errors"
-	"github.com/madokast/GoDFS/internal/ifile"
+	"github.com/madokast/GoDFS/others/memory_file_system/ifile"
 	"strings"
 )
 

@@ -20,7 +20,7 @@ func Test_runServers(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		addr := address[i%len(address)]
-		url := "http" + "://" + addr + "/proxy"
+		url := "httputils" + "://" + addr + "/proxy"
 		resp, err := http.Get(url)
 		if err != nil && !strings.Contains(err.Error(), "EOF") {
 			logger.Error(err)

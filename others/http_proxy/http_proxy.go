@@ -34,7 +34,7 @@ func helloHandle(h *handle) func(w http.ResponseWriter, r *http.Request) {
 func helloProxy(h *handle) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		addr := h.addresses[rand.Intn(len(h.addresses))]
-		parse, err := url.Parse("http" + "://" + addr + "/hello")
+		parse, err := url.Parse("httputils" + "://" + addr + "/hello")
 		if err != nil {
 			logger.Error(err)
 			_, _ = w.Write([]byte(err.Error()))

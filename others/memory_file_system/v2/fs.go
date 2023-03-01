@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/madokast/GoDFS/internal/ifile"
+	"github.com/madokast/GoDFS/others/memory_file_system/ifile"
 	"github.com/madokast/GoDFS/utils/logger"
 	"sort"
 	"strings"
