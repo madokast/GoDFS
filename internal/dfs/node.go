@@ -12,7 +12,6 @@ type NodeConf struct {
 type Node interface {
 	nodeInfo
 	nodeFileIO
-	nodeDoFileIO
 	nodeFileOP
 	nodeDoFileOP
 	ListenAndServeGo()
@@ -30,20 +29,9 @@ type nodeInfo interface {
 
 // nodeFileIO 发送信息到该节点处理
 type nodeFileIO interface {
-	Lock(path string) error                                 // 节点文件加锁
-	Unlock(path string) error                               // 节点文件解锁
-	SetVersion(path string) error                           // 设定版本
-	Version(path string) (int64, error)                     // 节点文件版本。需要有 header 存储锁信息和版本
 	Read(path string, offset, length int64) ([]byte, error) // 节点文件读取
 	Write(path string, offset int64, data []byte) error     // 节点文件写入
-}
 
-// nodeDoFileIO 节点处理逻辑，在
-type nodeDoFileIO interface {
-	DoLock(w http.ResponseWriter, r *http.Request)
-	DoUnlock(w http.ResponseWriter, r *http.Request)
-	DoSetVersion(w http.ResponseWriter, r *http.Request)
-	DoVersion(w http.ResponseWriter, r *http.Request)
 	DoRead(w http.ResponseWriter, r *http.Request)
 	DoWrite(w http.ResponseWriter, r *http.Request)
 }

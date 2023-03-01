@@ -2,8 +2,8 @@ package example_node
 
 import (
 	"github.com/madokast/GoDFS/utils/httputils"
-	"github.com/madokast/GoDFS/utils/jsonutils"
 	"github.com/madokast/GoDFS/utils/logger"
+	"github.com/madokast/GoDFS/utils/serializer"
 	"testing"
 	"time"
 )
@@ -22,5 +22,5 @@ func Test_node_getInfo(t *testing.T) {
 	if err != nil {
 		logger.Error(err)
 	}
-	logger.Info(jsonutils.String(info))
+	logger.Info(serializer.JsonString(info))
 }

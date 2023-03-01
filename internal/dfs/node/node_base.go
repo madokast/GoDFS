@@ -12,6 +12,7 @@ import (
 const (
 	baseApi = "/node"
 	pingApi = baseApi + "/alive"
+	readApi = baseApi + "/read"
 )
 
 type node struct {
@@ -46,7 +47,7 @@ func (n *node) baseUrl() string {
 
 func (n *node) Ping() bool {
 	ret := &web.Response[*web.NullResponse]{}
-	err := httputils.Post(n.ip, n.port, pingApi, &web.NullRequest{}, ret)
+	err := httputils.PostJson(n.ip, n.port, pingApi, &web.NullRequest{}, ret)
 	if err != nil {
 		logger.Error(err)
 		return false
@@ -55,8 +56,8 @@ func (n *node) Ping() bool {
 }
 
 func (n *node) DoPing(w http.ResponseWriter, r *http.Request) {
-	httputils.Handle(w, r, &web.BaseResponse{}, func(req *web.BaseResponse) *web.NullResponse {
-		return &web.NullResponse{}
+	httputils.HandleJson(w, r, &web.BaseResponse{}, func(req *web.BaseResponse) (*web.NullResponse, error) {
+		return &web.NullResponse{}, nil
 	})
 }
 
@@ -64,6 +65,8 @@ func (n *node) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case pingApi:
 		n.DoPing(w, r)
+	case readApi:
+		n.DoRead(w, r)
 	default:
 		logger.Error("Unknown url", r.URL.Path)
 	}

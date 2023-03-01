@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/madokast/GoDFS/utils/jsonutils"
+	"github.com/madokast/GoDFS/utils/serializer"
 	"time"
 )
 
@@ -44,5 +44,5 @@ func Fail(code int, msg string) *BaseResponse {
 }
 
 func (br *BaseResponse) String() string {
-	return jsonutils.String(br)
+	return serializer.JsonString(br)
 }

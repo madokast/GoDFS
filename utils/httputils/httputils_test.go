@@ -2,8 +2,8 @@ package httputils
 
 import (
 	"github.com/madokast/GoDFS/internal/web"
-	"github.com/madokast/GoDFS/utils/jsonutils"
 	"github.com/madokast/GoDFS/utils/logger"
+	"github.com/madokast/GoDFS/utils/serializer"
 	"net/http"
 	"strconv"
 	"testing"
@@ -23,9 +23,9 @@ func TestPost(t *testing.T) {
 
 	http.HandleFunc("/hello", func(writer http.ResponseWriter, request *http.Request) {
 		p := person{}
-		Handle(writer, request, &p, func(req *person) *hello {
+		HandleJson(writer, request, &p, func(req *person) (*hello, error) {
 			logger.Info(p)
-			return &hello{Name: p.Name, Time: time.Now().UnixMilli()}
+			return &hello{Name: p.Name, Time: time.Now().UnixMilli()}, nil
 		})
 	})
 
@@ -42,11 +42,11 @@ func TestPost(t *testing.T) {
 
 	p := person{Name: "xyn"}
 	h := web.Response[*hello]{}
-	err := Post("127.0.0.1", freePort, "/hello", &p, &h)
+	err := PostJson("127.0.0.1", freePort, "/hello", &p, &h)
 	if err != nil && err.Error() != "EOF" {
 		logger.Error(err)
 	}
-	logger.Info(jsonutils.String(h))
+	logger.Info(serializer.JsonString(h))
 }
 
 func TestGetFreePort(t *testing.T) {

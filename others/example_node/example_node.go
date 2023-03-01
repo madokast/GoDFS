@@ -18,9 +18,9 @@ type node struct {
 func (n *node) serverGo() {
 	http.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("listen /info")
-		httputils.Handle(w, r, &web.NullRequest{}, func(req *web.NullRequest) *node {
+		httputils.HandleJson(w, r, &web.NullRequest{}, func(req *web.NullRequest) (*node, error) {
 			ret := &node{IP: n.IP, Port: n.Port, Info: n.Info + " ^_^"}
-			return ret
+			return ret, nil
 		})
 	})
 
@@ -35,7 +35,7 @@ func (n *node) serverGo() {
 func (n *node) getInfo() (*node, error) {
 	ret := &web.Response[*node]{}
 	logger.Info("call /info")
-	err := httputils.Post(n.IP, n.Port, "/info", &web.NullRequest{}, ret)
+	err := httputils.PostJson(n.IP, n.Port, "/info", &web.NullRequest{}, ret)
 	if ret.Msg != web.SuccessMsg {
 		return nil, errors.New(ret.Msg)
 	}
