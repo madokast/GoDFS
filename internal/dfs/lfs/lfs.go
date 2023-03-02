@@ -7,6 +7,7 @@ import (
 	"github.com/madokast/GoDFS/utils/logger"
 	"io"
 	"os"
+	path2 "path"
 )
 
 func ReadLocal(path string, offset, length int64) ([]byte, error) {
@@ -57,7 +58,13 @@ func WriteLocal(path string, offset int64, data []byte) error {
 	return nil
 }
 
+// CreateFileLocal 创建文件，如果文件夹不存在，则创建
 func CreateFileLocal(path string, size int64) error {
+	father := path2.Dir(path)
+	err := MkdirAllLocal(father)
+	if err != nil {
+		return err
+	}
 	file, err := os.Create(path)
 	if err != nil {
 		return errors.New("Create local " + path + " because " + err.Error())
@@ -82,6 +89,24 @@ func MkdirAllLocal(path string) error {
 func DeleteLocal(path string) error {
 	return os.RemoveAll(path)
 }
+
+// ListFilesLocal 列出本地目录下的所有文件/子目录
+func ListFilesLocal(dir string) (files []string, dirs []string, err error) {
+	paths, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for _, path := range paths {
+		if path.IsDir() {
+			dirs = append(dirs, path2.Join(dir, path.Name()))
+		} else {
+			files = append(dirs, path2.Join(dir, path.Name()))
+		}
+	}
+	return files, dirs, nil
+}
+
 func StatLocal(path string) (os.FileInfo, error) {
 	stat, err := os.Stat(path)
 	if err != nil {

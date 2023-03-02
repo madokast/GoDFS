@@ -19,6 +19,7 @@ const (
 	deletePathApi = baseApi + "/path/delete"
 	statPathApi   = baseApi + "/path/stat"
 	existPathApi  = baseApi + "/path/exist"
+	listFilesApi  = baseApi + "/listfiles"
 )
 
 type Impl struct {
@@ -46,6 +47,8 @@ func (n *Impl) registerRouter() {
 	// node_path-check.go
 	n.router[statPathApi] = n.DoStat
 	n.router[existPathApi] = n.DoExist
+	// node_dir-op.go
+	n.router[listFilesApi] = n.DoListFiles
 }
 
 func (n *Impl) IP() string {
@@ -70,6 +73,10 @@ func (n *Impl) Location() *file.Location {
 
 func (n *Impl) String() string {
 	return fmt.Sprintf("Node %s:%d root %s", n.ip, n.port, n.rootDir)
+}
+
+func (n *Impl) Key() string {
+	return fmt.Sprintf("%s:%d", n.ip, n.port)
 }
 
 func (n *Impl) baseUrl() string {

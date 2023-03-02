@@ -28,6 +28,7 @@ type info interface {
 	Port() uint16
 	RootDir() string // 文件系统根目录，OSFullPath = RootDir / FullName
 	String() string
+	Key() string
 	Location() *file.Location
 }
 
@@ -43,7 +44,6 @@ type fileIO interface {
 // nodeFileOP 发送信息到该节点处理
 type fileOP interface {
 	CreateFile(path string, size int64) error                         // 创建文件，指定文件大小，后期无法改变
-	MkdirAll(path string)                                             // 创建文件夹，支持级联
 	ListFiles(path string) (files []string, dirs []string, err error) // 列出文件夹下所有文件/路径
 	Delete(path string) error                                         // 删除文件、文件夹，如果文件夹不空则级联删除。路径不存在不会报错
 	Stat(path string) (file.Meta, error)                              // 获取文件元信息
@@ -52,7 +52,6 @@ type fileOP interface {
 
 type doFileOP interface {
 	DoCreateFile(w http.ResponseWriter, r *http.Request)
-	DoMkdirAll(w http.ResponseWriter, r *http.Request)
 	DoListFiles(w http.ResponseWriter, r *http.Request)
 	DoDelete(w http.ResponseWriter, r *http.Request)
 	DoStat(w http.ResponseWriter, r *http.Request)

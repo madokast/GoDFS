@@ -1,23 +1,38 @@
 package nodeimpl
 
-import "net/http"
+import (
+	"errors"
+	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/web"
+	"github.com/madokast/GoDFS/utils/httputils"
+	"net/http"
+	"path"
+)
 
-func (n *Impl) MkdirAll(path string) {
-	//TODO implement me
-	panic("implement me")
+type listFilesReq struct {
+	Path string `json:"path,omitempty"`
+}
+
+type listFilesRsp struct {
+	Files []string `json:"files,omitempty"`
+	Dirs  []string `json:"dirs,omitempty"`
 }
 
 func (n *Impl) ListFiles(path string) (files []string, dirs []string, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (n *Impl) DoMkdirAll(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	ret := web.Response[*listFilesRsp]{}
+	err = httputils.PostJson(n.ip, n.port, listFilesApi, &listFilesReq{Path: path}, &ret)
+	if err != nil {
+		return nil, nil, err
+	}
+	if ret.Msg != web.SuccessMsg {
+		return nil, nil, errors.New(ret.Msg)
+	}
+	return ret.Data.Files, ret.Data.Dirs, nil
 }
 
 func (n *Impl) DoListFiles(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	httputils.HandleJson(w, r, &listFilesReq{}, func(req *listFilesReq) (*listFilesRsp, error) {
+		files, dirs, err := lfs.ListFilesLocal(path.Join(n.rootDir, req.Path))
+		return &listFilesRsp{Files: files, Dirs: dirs}, err
+	})
 }
