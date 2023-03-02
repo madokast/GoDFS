@@ -1,7 +1,7 @@
-package node
+package nodeimpl
 
 import (
-	"github.com/madokast/GoDFS/internal/dfs"
+	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
 	"testing"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	n := New(&dfs.NodeConf{
+	n := New(&node.Info{
 		IP:      "127.0.0.1",
 		Port:    httputils.GetFreePort(),
 		RootDir: "/dfs",
@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestAlive(t *testing.T) {
-	n := New(&dfs.NodeConf{
+	n := New(&node.Info{
 		IP:      "127.0.0.1",
 		Port:    httputils.GetFreePort(),
 		RootDir: "/dfs",
@@ -41,7 +41,7 @@ func TestAlive(t *testing.T) {
 }
 
 func TestAlive2(t *testing.T) {
-	n1 := New(&dfs.NodeConf{
+	n1 := New(&node.Info{
 		IP:      "127.0.0.1",
 		Port:    httputils.GetFreePort(),
 		RootDir: "/dfs1",
@@ -50,7 +50,7 @@ func TestAlive2(t *testing.T) {
 	n1.ListenAndServeGo()
 	time.Sleep(100 * time.Millisecond)
 
-	n2 := New(&dfs.NodeConf{
+	n2 := New(&node.Info{
 		IP:      "127.0.0.1",
 		Port:    httputils.GetFreePort(),
 		RootDir: "/dfs2",

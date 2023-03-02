@@ -37,7 +37,7 @@ func PostGob[Request, Response interface{}](ip string, port uint16, api string, 
 		return err
 	}
 
-	response, err := http.Post(fmt.Sprintf("http://%s:%d%s", ip, port, api), "application/json", &buf)
+	response, err := http.Post(fmt.Sprintf("http://%s:%d%s", ip, port, api), "application/octet-stream", &buf)
 	if err != nil {
 		return err
 	}

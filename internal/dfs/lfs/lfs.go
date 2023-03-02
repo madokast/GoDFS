@@ -82,3 +82,25 @@ func MkdirAllLocal(path string) error {
 func DeleteLocal(path string) error {
 	return os.RemoveAll(path)
 }
+func StatLocal(path string) (os.FileInfo, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, errors.New("File " + path + " does not exist")
+		}
+		return nil, err
+	}
+	return stat, nil
+}
+
+func ExistLocal(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		logger.Error(err)
+		return false
+	}
+	return true
+}

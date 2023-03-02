@@ -7,9 +7,6 @@ import (
 
 const SuccessMsg = "Successful"
 
-type NullRequest struct {
-}
-
 type NullResponse struct {
 }
 
