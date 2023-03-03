@@ -8,6 +8,7 @@ import (
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -29,10 +30,11 @@ type Impl struct {
 	port    uint16
 	rootDir string
 	router  map[string]web.HandleFunc
+	closed  bool
 }
 
 func New(conf *node.Info) node.Node {
-	n := &Impl{ip: conf.IP, port: conf.Port, rootDir: conf.RootDir}
+	n := &Impl{ip: conf.IP, port: conf.Port, rootDir: conf.RootDir, closed: false}
 	n.registerRouter()
 	return n
 }
@@ -76,7 +78,7 @@ func (n *Impl) Location() *file.Location {
 }
 
 func (n *Impl) String() string {
-	return fmt.Sprintf("Node %s:%d root %s", n.ip, n.port, n.rootDir)
+	return n.Key()
 }
 
 func (n *Impl) Info() *node.Info {
@@ -98,7 +100,7 @@ func (n *Impl) baseUrl() string {
 func (n *Impl) Ping() bool {
 	ret := &web.Response[*web.NullResponse]{}
 	err := httputils.PostJson(n.ip, n.port, pingApi, &web.NullRequest{}, ret)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "EOF") {
 		logger.Error(err)
 		return false
 	}
@@ -112,6 +114,11 @@ func (n *Impl) DoPing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (n *Impl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if n.closed {
+		w.WriteHeader(500)
+		return
+	}
+
 	handle, ok := n.router[r.URL.Path]
 	if ok {
 		handle(w, r)
@@ -128,4 +135,8 @@ func (n *Impl) ListenAndServeGo() {
 			logger.Error(err)
 		}
 	}()
+}
+
+func (n *Impl) Close() {
+	n.closed = true
 }

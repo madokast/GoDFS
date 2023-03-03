@@ -10,15 +10,19 @@ import (
 )
 
 type syncReq struct {
-	TargetNode *node.Info `json:"targetNode"`
-	File       string     `json:"file"`
+	SrcNode *node.Info `json:"srcNode"`
+	File    string     `json:"file"`
 }
 
-func (n *Impl) Sync(target node.Node, file string) error {
+func (n *Impl) Sync(src node.Node, file string) error {
+	if n.Key() == src.Key() {
+		return nil
+	}
+
 	ret := web.Response[*web.NullResponse]{}
 	err := httputils.PostJson(n.ip, n.port, syncApi, &syncReq{
-		TargetNode: target.Info(),
-		File:       file,
+		SrcNode: src.Info(),
+		File:    file,
 	}, &ret)
 	if err != nil {
 		return err
@@ -31,7 +35,7 @@ func (n *Impl) Sync(target node.Node, file string) error {
 
 func (n *Impl) DoSync(w http.ResponseWriter, r *http.Request) {
 	httputils.HandleJson(w, r, &syncReq{}, func(req *syncReq) (*web.NullResponse, error) {
-		target := New(req.TargetNode)
+		src := New(req.SrcNode)
 
 		// 我方是否存在
 		exist, err := n.Exist(req.File)
@@ -44,26 +48,26 @@ func (n *Impl) DoSync(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return nil, err
 			}
-			thatMd5, err := target.MD5(req.File)
+			thatMd5, err := src.MD5(req.File)
 			if err != nil {
 				return nil, err
 			}
 			if thisMd5 == thatMd5 {
-				logger.Debug("Same MD5", thisMd5, req.File, n.Key(), target.Key(), "sync pass")
+				logger.Debug("Same MD5", thisMd5, req.File, n.Key(), src.Key(), "sync pass")
 				return nil, nil
 			} else {
 				// 复制
-				logger.Debug("Inconsistent MD5", thisMd5, thatMd5, req.File, n.Key(), target.Key())
+				logger.Debug("Inconsistent MD5", thisMd5, thatMd5, req.File, n.Key(), src.Key())
 				goto copy
 			}
 		} else {
 			// 不存在创建
-			stat, err := target.Stat(req.File)
+			stat, err := src.Stat(req.File)
 			if err != nil {
 				return nil, err
 			}
 			if !stat.Exist() {
-				return nil, errors.New("Target node " + target.Key() + " contains no " + req.File)
+				return nil, errors.New("Src node " + src.Key() + " contains no " + req.File)
 			}
 			err = n.CreateFile(req.File, stat.Size())
 			if err != nil {
@@ -78,9 +82,9 @@ func (n *Impl) DoSync(w http.ResponseWriter, r *http.Request) {
 			return nil, err
 		}
 		if !stat.Exist() {
-			return nil, errors.New("Thus node " + n.Key() + " " + req.File + " concurrent modified?")
+			return nil, errors.New("The node " + n.Key() + " " + req.File + " concurrent modified?")
 		}
-		read, err := target.Read(req.File, 0, stat.Size())
+		read, err := src.Read(req.File, 0, stat.Size())
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +92,7 @@ func (n *Impl) DoSync(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return nil, err
 		}
-		logger.Info("Sync done", req.File, target.Key(), "to", n.Key())
+		logger.Info("Sync done", req.File, src.Key(), "to", n.Key())
 		return nil, nil
 	})
 }

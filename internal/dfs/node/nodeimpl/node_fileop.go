@@ -5,6 +5,7 @@ import (
 	"github.com/madokast/GoDFS/internal/dfs/lfs"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
+	"github.com/madokast/GoDFS/utils/logger"
 	"net/http"
 	"path"
 )
@@ -82,4 +83,31 @@ func (n *Impl) DoMD5(w http.ResponseWriter, r *http.Request) {
 		md5, err := lfs.Md5Local(path.Join(n.rootDir, req.Path))
 		return &md5Rsp{Value: md5}, err
 	})
+}
+
+func (n *Impl) ForAllFile(path string, consumer func(file string)) {
+	stat, err := n.Stat(path)
+	if err != nil {
+		logger.Error(n.Key(), "stat", path, err)
+		return
+	}
+	if !stat.Exist() {
+		return
+	}
+	if stat.IsDirectory() {
+		files, dirs, err := n.ListFiles(path)
+		if err != nil {
+			logger.Error(n.Key(), "list", path, err)
+			return
+		}
+		for _, file := range files {
+			consumer(file)
+		}
+		for _, d := range dirs {
+			n.ForAllFile(d, consumer)
+		}
+	} else {
+		consumer(path)
+	}
+
 }

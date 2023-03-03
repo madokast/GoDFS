@@ -17,6 +17,7 @@ type Meta interface {
 	Size() int64
 	IsDirectory() bool
 	Locations() []*Location
+	ModifyTime() int64
 	String() string
 }
 
@@ -26,6 +27,7 @@ type MetaImpl struct {
 	Exist_       bool        `json:"exist,omitempty"`
 	Size_        int64       `json:"size,omitempty"`
 	IsDirectory_ bool        `json:"isDirectory,omitempty"`
+	ModifyTime_  int64       `json:"modifyTime,omitempty"`
 	Locations_   []*Location `json:"locations,omitempty"`
 }
 
@@ -47,6 +49,10 @@ func (m *MetaImpl) IsDirectory() bool {
 
 func (m *MetaImpl) Locations() []*Location {
 	return m.Locations_
+}
+
+func (m *MetaImpl) ModifyTime() int64 {
+	return m.ModifyTime_
 }
 
 func (m *MetaImpl) String() string {

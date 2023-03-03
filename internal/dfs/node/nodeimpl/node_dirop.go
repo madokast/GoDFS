@@ -33,6 +33,12 @@ func (n *Impl) ListFiles(path string) (files []string, dirs []string, err error)
 func (n *Impl) DoListFiles(w http.ResponseWriter, r *http.Request) {
 	httputils.HandleJson(w, r, &listFilesReq{}, func(req *listFilesReq) (*listFilesRsp, error) {
 		files, dirs, err := lfs.ListFilesLocal(path.Join(n.rootDir, req.Path))
+		for i := 0; i < len(files); i++ {
+			files[i] = path.Join(req.Path, files[i])
+		}
+		for i := 0; i < len(dirs); i++ {
+			dirs[i] = path.Join(req.Path, dirs[i])
+		}
 		return &listFilesRsp{Files: files, Dirs: dirs}, err
 	})
 }

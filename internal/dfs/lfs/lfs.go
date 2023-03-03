@@ -94,6 +94,7 @@ func DeleteLocal(path string) error {
 }
 
 // ListFilesLocal 列出本地目录下的所有文件/子目录。目录不存在不报错
+// 返回的是 base name
 func ListFilesLocal(dir string) (files []string, dirs []string, err error) {
 	paths, err := os.ReadDir(dir)
 	if err != nil {
@@ -105,9 +106,9 @@ func ListFilesLocal(dir string) (files []string, dirs []string, err error) {
 
 	for _, path := range paths {
 		if path.IsDir() {
-			dirs = append(dirs, path2.Join(dir, path.Name()))
+			dirs = append(dirs, path.Name())
 		} else {
-			files = append(dirs, path2.Join(dir, path.Name()))
+			files = append(files, path.Name())
 		}
 	}
 	return files, dirs, nil

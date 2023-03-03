@@ -22,10 +22,11 @@ type Node interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 	Ping() bool
 	DoPing(w http.ResponseWriter, r *http.Request)
+	Close()
 }
 
 type sync interface {
-	Sync(target Node, file string) error // 从 target 同步文件到 this
+	Sync(src Node, file string) error // 从 src 同步文件到 this
 	DoSync(w http.ResponseWriter, r *http.Request)
 }
 
@@ -56,6 +57,8 @@ type fileOP interface {
 	Stat(path string) (file.Meta, error)                              // 获取文件元信息
 	Exist(path string) (bool, error)                                  // 判断文件是否存在
 	MD5(file string) (string, error)                                  // 文件 MD5
+
+	ForAllFile(path string, consumer func(file string)) // 目录下文件深度遍历。如果传入的是文件，则直接传给 consumer
 }
 
 type doFileOP interface {

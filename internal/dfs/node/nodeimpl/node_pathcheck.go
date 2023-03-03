@@ -61,6 +61,7 @@ func (n *Impl) DoStat(w http.ResponseWriter, r *http.Request) {
 			meta.Exist_ = true
 			meta.Size_ = stat.Size()
 			meta.IsDirectory_ = stat.IsDir()
+			meta.ModifyTime_ = stat.ModTime().UnixMilli()
 			meta.Locations_ = []*file.Location{n.Location()}
 		}
 		return meta, nil
