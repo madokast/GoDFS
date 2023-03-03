@@ -13,6 +13,7 @@ type Location struct {
 // Meta 文件信息
 type Meta interface {
 	FullName() string
+	Exist() bool
 	Size() int64
 	IsDirectory() bool
 	Locations() []*Location
@@ -22,6 +23,7 @@ type Meta interface {
 // MetaImpl 文件信息，用于 Stat 请求 response
 type MetaImpl struct {
 	FullName_    string      `json:"fullName,omitempty"`
+	Exist_       bool        `json:"exist,omitempty"`
 	Size_        int64       `json:"size,omitempty"`
 	IsDirectory_ bool        `json:"isDirectory,omitempty"`
 	Locations_   []*Location `json:"locations,omitempty"`
@@ -29,6 +31,10 @@ type MetaImpl struct {
 
 func (m *MetaImpl) FullName() string {
 	return m.FullName_
+}
+
+func (m *MetaImpl) Exist() bool {
+	return m.Exist_
 }
 
 func (m *MetaImpl) Size() int64 {

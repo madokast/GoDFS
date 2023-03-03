@@ -48,16 +48,22 @@ func (n *Impl) Exist(path string) (bool, error) {
 
 func (n *Impl) DoStat(w http.ResponseWriter, r *http.Request) {
 	httputils.HandleJson(w, r, &statReq{}, func(req *statReq) (*file.MetaImpl, error) {
-		stat, err := lfs.StatLocal(path.Join(n.rootDir, req.Path))
+		stat, exist, err := lfs.StatLocal(path.Join(n.rootDir, req.Path))
 		if err != nil {
 			return nil, err
 		}
-		return &file.MetaImpl{
-			FullName_:    req.Path,
-			Size_:        stat.Size(),
-			IsDirectory_: stat.IsDir(),
-			Locations_:   []*file.Location{n.Location()},
-		}, nil
+		meta := &file.MetaImpl{
+			FullName_: req.Path,
+		}
+		if !exist {
+			meta.Exist_ = false
+		} else {
+			meta.Exist_ = true
+			meta.Size_ = stat.Size()
+			meta.IsDirectory_ = stat.IsDir()
+			meta.Locations_ = []*file.Location{n.Location()}
+		}
+		return meta, nil
 	})
 }
 

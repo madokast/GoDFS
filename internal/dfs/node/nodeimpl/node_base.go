@@ -16,6 +16,8 @@ const (
 	readFileApi   = baseApi + "/file/read"
 	writeFileApi  = baseApi + "/file/write"
 	createFileApi = baseApi + "/file/create"
+	md5Api        = baseApi + "/file/md5"
+	syncApi       = baseApi + "/file/sync"
 	deletePathApi = baseApi + "/path/delete"
 	statPathApi   = baseApi + "/path/stat"
 	existPathApi  = baseApi + "/path/exist"
@@ -44,6 +46,8 @@ func (n *Impl) registerRouter() {
 	// node_file-op.go
 	n.router[createFileApi] = n.DoCreateFile
 	n.router[deletePathApi] = n.DoDelete
+	n.router[md5Api] = n.DoMD5
+	n.router[syncApi] = n.DoSync
 	// node_path-check.go
 	n.router[statPathApi] = n.DoStat
 	n.router[existPathApi] = n.DoExist
@@ -73,6 +77,14 @@ func (n *Impl) Location() *file.Location {
 
 func (n *Impl) String() string {
 	return fmt.Sprintf("Node %s:%d root %s", n.ip, n.port, n.rootDir)
+}
+
+func (n *Impl) Info() *node.Info {
+	return &node.Info{
+		IP:      n.ip,
+		Port:    n.port,
+		RootDir: n.rootDir,
+	}
 }
 
 func (n *Impl) Key() string {

@@ -10,12 +10,14 @@ import (
 */
 
 type Conf struct {
+	HashCircleReplicaNum int
+	FileReplicaNum       int
 }
 
 type info interface {
 	AddNode(node node.Node)
 	AllNodes() []node.Node
-	RefreshAliveNodesAndHandCircle() // 刷新存活的 node 和 hash 环，定时调用
+	RefreshAliveNodesAndHashCircle() // 刷新存活的 node 和 hash 环，定时调用
 	HashDistribute(key string, num int) []node.Node
 	String() string
 }

@@ -2,6 +2,7 @@ package fsimpl
 
 import (
 	"fmt"
+	"github.com/madokast/GoDFS/internal/dfs/fs"
 	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/dlock"
 	"github.com/madokast/GoDFS/utils/logger"
@@ -10,11 +11,22 @@ import (
 )
 
 type Impl struct {
-	allNodes        map[string]node.Node  // 素有 node
-	aliveNodes      map[string]node.Node  // 存活 node
-	hashCircle      consistent.Consistent // 一致 hash
-	distributedLock dlock.Lock            // 分布式锁
-	localLock       sync.Mutex            // 局部锁
+	allNodes        map[string]node.Node   // 素有 node
+	aliveNodes      map[string]node.Node   // 存活 node
+	hashCircle      *consistent.Consistent // 一致 hash
+	distributedLock dlock.Lock             // 分布式锁
+	localLock       sync.Mutex             // 局部锁
+}
+
+func New(distributedLock dlock.Lock, conf *fs.Conf) fs.DFS {
+	dfs := &Impl{
+		allNodes:        map[string]node.Node{},
+		aliveNodes:      map[string]node.Node{},
+		hashCircle:      consistent.New(),
+		distributedLock: distributedLock,
+	}
+	dfs.hashCircle.NumberOfReplicas = conf.HashCircleReplicaNum
+	return dfs
 }
 
 func (dfs *Impl) AddNode(n node.Node) {
@@ -33,7 +45,7 @@ func (dfs *Impl) AllNodes() []node.Node {
 	return nodes
 }
 
-func (dfs *Impl) RefreshAliveNodesAndHandCircle() {
+func (dfs *Impl) RefreshAliveNodesAndHashCircle() {
 	dfs.localLock.Lock()
 	defer dfs.localLock.Unlock()
 	dfs.refreshAliveNodesAndHandCircleUnLock()
@@ -46,7 +58,8 @@ func (dfs *Impl) refreshAliveNodesAndHandCircleUnLock() {
 			if ok {
 				// 已经加入过
 			} else {
-				logger.Info("New alive node", n)
+				logger.Info("New alive node", n.Location())
+				// 需要先同步数据才能启用
 				dfs.aliveNodes[n.Key()] = n
 				dfs.hashCircle.Add(n.Key())
 			}
@@ -54,7 +67,7 @@ func (dfs *Impl) refreshAliveNodesAndHandCircleUnLock() {
 			_, ok := dfs.aliveNodes[n.Key()]
 			if ok {
 				// 需要移除
-				logger.Warn("Lost node", n)
+				logger.Warn("Lost node", n.Location())
 				delete(dfs.aliveNodes, n.Key())
 				dfs.hashCircle.Remove(n.Key())
 			}

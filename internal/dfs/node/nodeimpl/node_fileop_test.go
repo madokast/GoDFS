@@ -110,3 +110,32 @@ func Test_node_Delete3(t *testing.T) {
 	utils.PanicIfErr(n.Delete("1.txt"))
 	utils.PanicIf(lfs.ExistLocal("/tmp/1.txt"))
 }
+
+func TestImpl_MD5(t *testing.T) {
+	port := httputils.GetFreePort()
+	n := New(&node.Info{
+		IP:      "127.0.0.1",
+		Port:    port,
+		RootDir: "/tmp",
+	})
+	n.ListenAndServeGo()
+	time.Sleep(100 * time.Millisecond)
+
+	utils.PanicIfErr(n.Delete("1.txt"))
+	utils.PanicIfErr(n.Delete("2.txt"))
+	utils.PanicIfErr(n.CreateFile("1.txt", 10))
+	utils.PanicIfErr(n.CreateFile("2.txt", 10))
+	utils.PanicIfErr(n.Write("1.txt", 2, []byte("abc")))
+	utils.PanicIfErr(n.Write("2.txt", 2, []byte("abc")))
+
+	md51, err := n.MD5("1.txt")
+	utils.PanicIfErr(err)
+	md52, err := n.MD5("2.txt")
+	utils.PanicIfErr(err)
+	logger.Info(md51)
+	logger.Info(md52)
+	utils.PanicIf(md51 != md52)
+
+	utils.PanicIfErr(n.Delete("1.txt"))
+	utils.PanicIfErr(n.Delete("2.txt"))
+}

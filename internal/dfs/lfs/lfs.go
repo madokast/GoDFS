@@ -2,12 +2,15 @@
 package lfs
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/madokast/GoDFS/utils/logger"
 	"io"
 	"os"
 	path2 "path"
+	"strings"
 )
 
 func ReadLocal(path string, offset, length int64) ([]byte, error) {
@@ -27,7 +30,7 @@ func ReadLocal(path string, offset, length int64) ([]byte, error) {
 	}
 	data := make([]byte, length)
 	n, err := f.Read(data)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "EOF") {
 		return nil, errors.New("Read local " + path + " because " + err.Error())
 	}
 	return data[:n], nil
@@ -49,7 +52,7 @@ func WriteLocal(path string, offset int64, data []byte) error {
 		return errors.New("Seek local " + path + " because " + err.Error())
 	}
 	n, err := f.Write(data)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "EOF") {
 		return errors.New("Write local " + path + " because " + err.Error())
 	}
 	if n != len(data) {
@@ -90,10 +93,13 @@ func DeleteLocal(path string) error {
 	return os.RemoveAll(path)
 }
 
-// ListFilesLocal 列出本地目录下的所有文件/子目录
+// ListFilesLocal 列出本地目录下的所有文件/子目录。目录不存在不报错
 func ListFilesLocal(dir string) (files []string, dirs []string, err error) {
 	paths, err := os.ReadDir(dir)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil, nil
+		}
 		return nil, nil, err
 	}
 
@@ -107,15 +113,16 @@ func ListFilesLocal(dir string) (files []string, dirs []string, err error) {
 	return files, dirs, nil
 }
 
-func StatLocal(path string) (os.FileInfo, error) {
+func StatLocal(path string) (info os.FileInfo, exist bool, err error) {
 	stat, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, errors.New("File " + path + " does not exist")
+			return nil, false, nil
 		}
-		return nil, err
+		return nil, false, err
 	}
-	return stat, nil
+	stat.ModTime()
+	return stat, true, nil
 }
 
 func ExistLocal(path string) bool {
@@ -128,4 +135,23 @@ func ExistLocal(path string) bool {
 		return false
 	}
 	return true
+}
+
+func Md5Local(file string) (string, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return "", err
+	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			logger.Error(err)
+		}
+	}(f)
+	hash := md5.New()
+	_, err = io.Copy(hash, f)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }

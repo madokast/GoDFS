@@ -17,16 +17,23 @@ type Node interface {
 	fileIO
 	fileOP
 	doFileOP
+	sync
 	ListenAndServeGo()
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 	Ping() bool
 	DoPing(w http.ResponseWriter, r *http.Request)
 }
 
+type sync interface {
+	Sync(target Node, file string) error // 从 target 同步文件到 this
+	DoSync(w http.ResponseWriter, r *http.Request)
+}
+
 type info interface {
 	IP() string
 	Port() uint16
 	RootDir() string // 文件系统根目录，OSFullPath = RootDir / FullName
+	Info() *Info
 	String() string
 	Key() string
 	Location() *file.Location
@@ -48,6 +55,7 @@ type fileOP interface {
 	Delete(path string) error                                         // 删除文件、文件夹，如果文件夹不空则级联删除。路径不存在不会报错
 	Stat(path string) (file.Meta, error)                              // 获取文件元信息
 	Exist(path string) (bool, error)                                  // 判断文件是否存在
+	MD5(file string) (string, error)                                  // 文件 MD5
 }
 
 type doFileOP interface {
@@ -56,4 +64,5 @@ type doFileOP interface {
 	DoDelete(w http.ResponseWriter, r *http.Request)
 	DoStat(w http.ResponseWriter, r *http.Request)
 	DoExist(w http.ResponseWriter, r *http.Request)
+	DoMD5(w http.ResponseWriter, r *http.Request)
 }

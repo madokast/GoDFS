@@ -39,9 +39,9 @@ func TestImpl_Stat2(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	utils.PanicIfErr(n.Delete("1.txt"))
-	_, err := n.Stat("1.txt")
-	logger.Info(err)
-	utils.PanicIf(err == nil, err)
+	stat, err := n.Stat("1.txt")
+	utils.PanicIfErr(err)
+	utils.PanicIf(stat.Exist())
 }
 
 func TestImpl_Exist(t *testing.T) {
@@ -77,9 +77,10 @@ func TestImpl_Exist2(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	utils.PanicIfErr(n.Delete("1.txt"))
-	_, err := n.Stat("1.txt")
+	stat, err := n.Stat("1.txt")
 	logger.Info(err)
-	utils.PanicIf(err == nil, err)
+	utils.PanicIfErr(err)
+	utils.PanicIf(stat.Exist())
 	exist, err := n.Exist("1.txt")
 	utils.PanicIfErr(err)
 	utils.PanicIf(exist)
