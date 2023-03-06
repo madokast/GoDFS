@@ -1,6 +1,7 @@
-package file
+package dfile
 
 import (
+	"github.com/madokast/GoDFS/internal/fs"
 	"github.com/madokast/GoDFS/utils/serializer"
 )
 
@@ -12,13 +13,8 @@ type Location struct {
 
 // Meta 文件信息
 type Meta interface {
-	FullName() string
-	Exist() bool
-	Size() int64
-	IsDirectory() bool
+	fs.Meta
 	Locations() []*Location
-	ModifyTime() int64
-	String() string
 }
 
 // MetaImpl 文件信息，用于 Stat 请求 response

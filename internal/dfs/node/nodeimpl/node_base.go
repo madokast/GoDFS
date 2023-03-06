@@ -2,9 +2,10 @@ package nodeimpl
 
 import (
 	"fmt"
-	"github.com/madokast/GoDFS/internal/dfs/file"
+	"github.com/madokast/GoDFS/internal/dfs/dfile"
 	"github.com/madokast/GoDFS/internal/dfs/node"
-	"github.com/madokast/GoDFS/internal/dfs/node/writecallback"
+	"github.com/madokast/GoDFS/internal/dfs/node/write_callback"
+	"github.com/madokast/GoDFS/internal/fs"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
@@ -13,13 +14,13 @@ import (
 )
 
 type Impl struct {
-	ip                 string
-	port               uint16
-	rootDir            string
-	router             map[string]web.HandleFunc
-	closed             bool // rpc 服务是否关闭。一般用于测试
-	localService       bool // 是否为本地 rpc，完成一些本地回调
-	node.WriteCallBack      // 写操作监听回调
+	ip               string
+	port             uint16
+	rootDir          string
+	router           map[string]web.HandleFunc
+	closed           bool // rpc 服务是否关闭。一般用于测试
+	localService     bool // 是否为本地 rpc，完成一些本地回调
+	fs.WriteCallBack      // 写操作监听回调
 }
 
 func New(conf *node.Info) node.Node {
@@ -30,7 +31,7 @@ func New(conf *node.Info) node.Node {
 		closed:       false,
 		localService: false,
 	}
-	n.WriteCallBack = writecallback.New(n)
+	n.WriteCallBack = write_callback.New(n)
 	n.registerRouter()
 	return n
 }
@@ -67,8 +68,8 @@ func (n *Impl) RootDir() string {
 	return n.rootDir
 }
 
-func (n *Impl) Location() *file.Location {
-	return &file.Location{
+func (n *Impl) Location() *dfile.Location {
+	return &dfile.Location{
 		IP:      n.ip,
 		Port:    n.port,
 		RootDir: n.rootDir,

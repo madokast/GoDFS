@@ -1,8 +1,9 @@
-package writecallback
+package write_callback
 
 import (
 	"errors"
 	"github.com/madokast/GoDFS/internal/dfs/node"
+	"github.com/madokast/GoDFS/internal/fs"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 不要直接使用这个类，这个类是 node 的内部类
 */
 
-type objSet = map[*node.WriteCallBackObj]struct{}
+type objSet = map[*fs.WriteCallBackObj]struct{}
 
 type Impl struct {
 	sync.Mutex
@@ -21,11 +22,11 @@ type Impl struct {
 	node        node.Node
 }
 
-func New(node node.Node) node.WriteCallBack {
+func New(node node.Node) fs.WriteCallBack {
 	return &Impl{callbackMap: map[string]objSet{}, node: node}
 }
 
-func (wc *Impl) RegisterWriteCallback(obj *node.WriteCallBackObj) {
+func (wc *Impl) RegisterWriteCallback(obj *fs.WriteCallBackObj) {
 	wc.Lock()
 	defer wc.Unlock()
 	set, ok := wc.callbackMap[obj.FileName]
@@ -38,13 +39,13 @@ func (wc *Impl) RegisterWriteCallback(obj *node.WriteCallBackObj) {
 	wc.callbackMap[obj.FileName] = set
 }
 
-func (wc *Impl) RemoveWriteCallback(obj *node.WriteCallBackObj) {
+func (wc *Impl) RemoveWriteCallback(obj *fs.WriteCallBackObj) {
 	wc.Lock()
 	defer wc.Unlock()
 	wc.removeWriteCallbackUnlock(obj)
 }
 
-func (wc *Impl) removeWriteCallbackUnlock(obj *node.WriteCallBackObj) {
+func (wc *Impl) removeWriteCallbackUnlock(obj *fs.WriteCallBackObj) {
 	set, ok := wc.callbackMap[obj.FileName]
 	if ok {
 		delete(set, obj)
@@ -77,9 +78,10 @@ func (wc *Impl) DoWriteCallback(w http.ResponseWriter, r *http.Request) {
 		defer wc.Unlock()
 		set, ok := wc.callbackMap[req.Path]
 		if ok {
-			var called []*node.WriteCallBackObj
+			var called []*fs.WriteCallBackObj
 			for obj := range set {
 				if obj.Intersect(req.Offset, req.Length) {
+					//logger.Debug("callback in", wc.node.String())
 					obj.Callback()
 					called = append(called, obj)
 				}

@@ -2,9 +2,10 @@ package nodeimpl
 
 import (
 	"errors"
-	"github.com/madokast/GoDFS/internal/dfs/file"
-	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/dfs/dfile"
 	"github.com/madokast/GoDFS/internal/dfs/node"
+	"github.com/madokast/GoDFS/internal/fs"
+	"github.com/madokast/GoDFS/internal/fs/lfs"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"
@@ -23,8 +24,8 @@ type existRsp struct {
 	Exist bool `json:"exist,omitempty"`
 }
 
-func (n *Impl) Stat(path string) (file.Meta, error) {
-	ret := web.Response[*file.MetaImpl]{}
+func (n *Impl) Stat(path string) (fs.Meta, error) {
+	ret := web.Response[*dfile.MetaImpl]{}
 	err := httputils.PostJson(n.ip, n.port, node.StatPathApi, &statReq{Path: path}, &ret)
 	if err != nil {
 		return nil, err
@@ -48,12 +49,12 @@ func (n *Impl) Exist(path string) (bool, error) {
 }
 
 func (n *Impl) DoStat(w http.ResponseWriter, r *http.Request) {
-	httputils.HandleJson(w, r, &statReq{}, func(req *statReq) (*file.MetaImpl, error) {
+	httputils.HandleJson(w, r, &statReq{}, func(req *statReq) (*dfile.MetaImpl, error) {
 		stat, exist, err := lfs.StatLocal(path.Join(n.rootDir, req.Path))
 		if err != nil {
 			return nil, err
 		}
-		meta := &file.MetaImpl{
+		meta := &dfile.MetaImpl{
 			FullName_: req.Path,
 		}
 		if !exist {
@@ -63,7 +64,7 @@ func (n *Impl) DoStat(w http.ResponseWriter, r *http.Request) {
 			meta.Size_ = stat.Size()
 			meta.IsDirectory_ = stat.IsDir()
 			meta.ModifyTime_ = stat.ModTime().UnixMilli()
-			meta.Locations_ = []*file.Location{n.Location()}
+			meta.Locations_ = []*dfile.Location{n.Location()}
 		}
 		return meta, nil
 	})

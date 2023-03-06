@@ -1,6 +1,14 @@
-package node
+package fs
 
 import "net/http"
+
+/**
+写通知回调
+使用 RegisterWriteCallback 注册一个文件片段和回调函数
+如果一个写操作涉及了该文件，并且写入范围和注册的范围有重叠，那么就会调用回调
+回调是一次性的，调用后自动移除
+可以手动删除注册的回调信息 RemoveWriteCallback
+*/
 
 type WriteCallBackObj struct {
 	FileName string

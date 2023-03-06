@@ -2,8 +2,8 @@ package nodeimpl
 
 import (
 	"errors"
-	"github.com/madokast/GoDFS/internal/dfs/lfs"
 	"github.com/madokast/GoDFS/internal/dfs/node"
+	"github.com/madokast/GoDFS/internal/fs/lfs"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"

@@ -13,6 +13,13 @@ import (
 	"strings"
 )
 
+/**
+提供本地文件操作基本函数
+和传统的文件系统的区别：
+1. 不向外暴露 file 对象
+2. 创建的文件大小无法改变，即没有 append 功能
+*/
+
 func ReadLocal(path string, offset, length int64) ([]byte, error) {
 	f, err := os.OpenFile(path, os.O_RDONLY, 0666)
 	if err != nil {
@@ -62,6 +69,7 @@ func WriteLocal(path string, offset int64, data []byte) error {
 }
 
 // CreateFileLocal 创建文件，如果文件夹不存在，则创建
+// 创建文件必须指定大小，且一旦创建，文件大小不能改变
 func CreateFileLocal(path string, size int64) error {
 	father := path2.Dir(path)
 	err := MkdirAllLocal(father)

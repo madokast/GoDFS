@@ -1,7 +1,8 @@
 package node
 
 import (
-	"github.com/madokast/GoDFS/internal/dfs/file"
+	"github.com/madokast/GoDFS/internal/dfs/dfile"
+	"github.com/madokast/GoDFS/internal/fs"
 	"net/http"
 )
 
@@ -33,7 +34,7 @@ type Node interface {
 	fileOP
 	doFileOP
 	sync
-	WriteCallBack
+	fs.WriteCallBack
 	ListenAndServeGo()                                // 启动 node 的 rpc 服务
 	ServeHTTP(w http.ResponseWriter, r *http.Request) // 实现 http.Handler 接口
 	Close()                                           // node rpc 服务下线，一般只用于测试
@@ -51,7 +52,7 @@ type info interface {
 	Info() *Info
 	String() string
 	Key() string
-	Location() *file.Location
+	Location() *dfile.Location
 	IsLocalService() bool // 是否为本地 rpc，完成一些本地回调
 
 	Ping() bool // 检查 node 是否存活
@@ -72,7 +73,7 @@ type fileOP interface {
 	CreateFile(path string, size int64) error                         // 创建文件，指定文件大小，后期无法改变
 	ListFiles(path string) (files []string, dirs []string, err error) // 列出文件夹下所有文件/路径
 	Delete(path string) error                                         // 删除文件、文件夹，如果文件夹不空则级联删除。路径不存在不会报错
-	Stat(path string) (file.Meta, error)                              // 获取文件元信息
+	Stat(path string) (fs.Meta, error)                                // 获取文件元信息
 	Exist(path string) (bool, error)                                  // 判断文件是否存在
 	MD5(file string) (string, error)                                  // 文件 MD5
 

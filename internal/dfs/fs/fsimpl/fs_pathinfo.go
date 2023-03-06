@@ -3,20 +3,20 @@ package fsimpl
 import (
 	"errors"
 	"fmt"
-	"github.com/madokast/GoDFS/internal/dfs/file"
 	"github.com/madokast/GoDFS/internal/dfs/node"
+	"github.com/madokast/GoDFS/internal/fs"
 	"github.com/madokast/GoDFS/utils/logger"
 )
 
-func (dfs *Impl) Stat(path string) (file.Meta, error) {
+func (dfs *Impl) Stat(path string) (fs.Meta, error) {
 	dfs.distributedLock.RLock()
 	defer dfs.distributedLock.RUnlock()
 	return dfs.statUnlock(path)
 }
 
-func (dfs *Impl) statUnlock(path string) (file.Meta, error) {
+func (dfs *Impl) statUnlock(path string) (fs.Meta, error) {
 	var errList []error
-	var meta file.Meta
+	var meta fs.Meta
 	for _, n := range dfs.aliveNodes {
 		m, err := n.Stat(path)
 		if err != nil {
