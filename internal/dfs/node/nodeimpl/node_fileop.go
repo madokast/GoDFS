@@ -3,6 +3,7 @@ package nodeimpl
 import (
 	"errors"
 	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
@@ -29,7 +30,7 @@ type md5Rsp struct {
 
 func (n *Impl) CreateFile(path string, size int64) error {
 	ret := web.Response[*web.NullResponse]{}
-	err := httputils.PostJson(n.ip, n.port, createFileApi, &createFileReq{Path: path, Size: size}, &ret)
+	err := httputils.PostJson(n.ip, n.port, node.CreateFileApi, &createFileReq{Path: path, Size: size}, &ret)
 	if err != nil {
 		return err
 	}
@@ -48,7 +49,7 @@ func (n *Impl) DoCreateFile(w http.ResponseWriter, r *http.Request) {
 
 func (n *Impl) MD5(file string) (string, error) {
 	ret := web.Response[*md5Rsp]{}
-	err := httputils.PostJson(n.ip, n.port, md5Api, &md5Req{Path: file}, &ret)
+	err := httputils.PostJson(n.ip, n.port, node.Md5Api, &md5Req{Path: file}, &ret)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +62,7 @@ func (n *Impl) MD5(file string) (string, error) {
 // Delete 删除文件、文件夹，递归删。不存在不报错
 func (n *Impl) Delete(path string) error {
 	ret := web.Response[*web.NullResponse]{}
-	err := httputils.PostJson(n.ip, n.port, deletePathApi, &deleteFileReq{Path: path}, &ret)
+	err := httputils.PostJson(n.ip, n.port, node.DeletePathApi, &deleteFileReq{Path: path}, &ret)
 	if err != nil {
 		return err
 	}

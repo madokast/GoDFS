@@ -3,6 +3,7 @@ package nodeimpl
 import (
 	"errors"
 	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"
@@ -20,7 +21,7 @@ type listFilesRsp struct {
 
 func (n *Impl) ListFiles(path string) (files []string, dirs []string, err error) {
 	ret := web.Response[*listFilesRsp]{}
-	err = httputils.PostJson(n.ip, n.port, listFilesApi, &listFilesReq{Path: path}, &ret)
+	err = httputils.PostJson(n.ip, n.port, node.ListFilesApi, &listFilesReq{Path: path}, &ret)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -3,6 +3,7 @@ package nodeimpl
 import (
 	"errors"
 	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"
@@ -27,7 +28,7 @@ type writeReq struct {
 
 func (n *Impl) Read(path string, offset, length int64) ([]byte, error) {
 	ret := web.Response[*readRsp]{}
-	err := httputils.PostGob(n.ip, n.port, readFileApi, &readReq{Path: path, Offset: offset, Length: length}, &ret)
+	err := httputils.PostGob(n.ip, n.port, node.ReadFileApi, &readReq{Path: path, Offset: offset, Length: length}, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func (n *Impl) Read(path string, offset, length int64) ([]byte, error) {
 
 func (n *Impl) Write(path string, offset int64, data []byte) error {
 	ret := web.Response[*web.NullResponse]{}
-	err := httputils.PostGob(n.ip, n.port, writeFileApi, &writeReq{Path: path, Offset: offset, Bytes: data}, &ret)
+	err := httputils.PostGob(n.ip, n.port, node.WriteFileApi, &writeReq{Path: path, Offset: offset, Bytes: data}, &ret)
 	if err != nil {
 		return err
 	}

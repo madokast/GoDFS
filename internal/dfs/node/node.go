@@ -5,6 +5,21 @@ import (
 	"net/http"
 )
 
+const (
+	baseApi          = "/node"
+	PingApi          = baseApi + "/alive"
+	ReadFileApi      = baseApi + "/file/read"
+	WriteFileApi     = baseApi + "/file/write"
+	CreateFileApi    = baseApi + "/file/create"
+	Md5Api           = baseApi + "/file/md5"
+	SyncApi          = baseApi + "/file/sync"
+	WriteCallBackApi = baseApi + "/file/write-callback"
+	DeletePathApi    = baseApi + "/path/delete"
+	StatPathApi      = baseApi + "/path/stat"
+	ExistPathApi     = baseApi + "/path/exist"
+	ListFilesApi     = baseApi + "/list-files"
+)
+
 type Info struct {
 	IP      string `json:"ip,omitempty"`
 	Port    uint16 `json:"port,omitempty"`
@@ -18,11 +33,10 @@ type Node interface {
 	fileOP
 	doFileOP
 	sync
-	ListenAndServeGo()
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	Ping() bool
-	DoPing(w http.ResponseWriter, r *http.Request)
-	Close()
+	WriteCallBack
+	ListenAndServeGo()                                // 启动 node 的 rpc 服务
+	ServeHTTP(w http.ResponseWriter, r *http.Request) // 实现 http.Handler 接口
+	Close()                                           // node rpc 服务下线，一般只用于测试
 }
 
 type sync interface {
@@ -38,6 +52,10 @@ type info interface {
 	String() string
 	Key() string
 	Location() *file.Location
+	IsLocalService() bool // 是否为本地 rpc，完成一些本地回调
+
+	Ping() bool // 检查 node 是否存活
+	DoPing(w http.ResponseWriter, r *http.Request)
 }
 
 // nodeFileIO 发送信息到该节点处理

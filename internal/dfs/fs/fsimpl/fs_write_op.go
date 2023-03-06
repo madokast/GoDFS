@@ -78,6 +78,15 @@ func (dfs *Impl) writeUnlock(path string, offset int64, data []byte) error {
 			errList = append(errList, err)
 		}
 	}
+
+	// 回调通知所有节点
+	for _, n := range dfs.aliveNodes {
+		err := n.WriteCallback(path, offset, int64(len(data)))
+		if err != nil {
+			logger.Warn("DFS write call back", path, n.String(), err)
+		}
+	}
+
 	if len(errList) > dfs.replicaNum/2 {
 		return errors.New("DFS write " + path + " " + fmt.Sprintf("%v", errList))
 	}

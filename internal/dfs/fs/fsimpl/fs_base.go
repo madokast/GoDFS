@@ -11,12 +11,13 @@ import (
 )
 
 type Impl struct {
-	allNodes        map[string]node.Node   // 素有 node
+	allNodes        map[string]node.Node   // 所有 node
 	aliveNodes      map[string]node.Node   // 存活 node
 	hashCircle      *consistent.Consistent // 一致 hash
-	distributedLock dlock.Lock             // 分布式锁，对文件/目录加锁。不管目录下的文件
-	localLock       sync.Mutex             // 局部锁
-	replicaNum      int                    // 副本数目
+	distributedLock dlock.Lock             // 分布式锁，用于文件读写操作
+	localLock       sync.Mutex             // 局部锁，用于 nodes 操作
+	replicaNum      int                    // 文件副本数目
+	localNode       node.Node              // 本地 node，用于本地回调函数处理，见 write_callback.go
 }
 
 func New(distributedLock dlock.Lock, conf *fs.Conf) fs.DFS {
@@ -53,6 +54,10 @@ func (dfs *Impl) AddNode(n node.Node) {
 	dfs.localLock.Lock()
 	defer dfs.localLock.Unlock()
 	dfs.allNodes[n.Key()] = n
+
+	if dfs.localNode == nil && n.IsLocalService() {
+		dfs.localNode = n
+	}
 }
 
 // AllNodes 返回 allNodes

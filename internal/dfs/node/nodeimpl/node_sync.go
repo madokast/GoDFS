@@ -20,7 +20,7 @@ func (n *Impl) Sync(src node.Node, file string) error {
 	}
 
 	ret := web.Response[*web.NullResponse]{}
-	err := httputils.PostJson(n.ip, n.port, syncApi, &syncReq{
+	err := httputils.PostJson(n.ip, n.port, node.SyncApi, &syncReq{
 		SrcNode: src.Info(),
 		File:    file,
 	}, &ret)

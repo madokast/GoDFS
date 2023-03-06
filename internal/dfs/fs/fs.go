@@ -35,8 +35,14 @@ type pathOP interface {
 	Exist(path string) (bool, error)                                  // 判断文件是否存在
 }
 
+type writeCallback interface {
+	RegisterWriteCallback(*node.WriteCallBackObj) // 注册文件修改通知回调。缓存层需要用到，用来失效一些资源
+	RemoveWriteCallback(*node.WriteCallBackObj)   // 取消注册
+}
+
 type DFS interface {
 	info
 	pathOP
 	pathIO
+	writeCallback
 }

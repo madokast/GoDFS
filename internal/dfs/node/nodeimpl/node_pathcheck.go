@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/madokast/GoDFS/internal/dfs/file"
 	"github.com/madokast/GoDFS/internal/dfs/lfs"
+	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"net/http"
@@ -24,7 +25,7 @@ type existRsp struct {
 
 func (n *Impl) Stat(path string) (file.Meta, error) {
 	ret := web.Response[*file.MetaImpl]{}
-	err := httputils.PostJson(n.ip, n.port, statPathApi, &statReq{Path: path}, &ret)
+	err := httputils.PostJson(n.ip, n.port, node.StatPathApi, &statReq{Path: path}, &ret)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func (n *Impl) Stat(path string) (file.Meta, error) {
 
 func (n *Impl) Exist(path string) (bool, error) {
 	ret := web.Response[*existRsp]{}
-	err := httputils.PostJson(n.ip, n.port, existPathApi, &existReq{Path: path}, &ret)
+	err := httputils.PostJson(n.ip, n.port, node.ExistPathApi, &existReq{Path: path}, &ret)
 	if err != nil {
 		return false, err
 	}
