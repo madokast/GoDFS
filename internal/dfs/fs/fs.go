@@ -3,6 +3,7 @@ package fs
 import (
 	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/fs"
+	"github.com/madokast/GoDFS/internal/fs/write_callback"
 )
 
 /**
@@ -16,8 +17,18 @@ type Conf struct {
 
 type DFS interface {
 	fs.BaseFS
+	lock
 	dfsBase
 	writeCallback
+}
+
+type lock interface {
+	LocalLock()
+	LocalUnlock()
+	DistributedRLock()
+	DistributedRUnlock()
+	DistributedWLock()
+	DistributedWUnlock()
 }
 
 type dfsBase interface {
@@ -29,6 +40,6 @@ type dfsBase interface {
 }
 
 type writeCallback interface {
-	RegisterWriteCallback(*fs.WriteCallBackObj) // 注册文件修改通知回调。缓存层需要用到，用来失效一些资源
-	RemoveWriteCallback(*fs.WriteCallBackObj)   // 取消注册
+	RegisterWriteCallback(*write_callback.Entry) // 注册文件修改通知回调。缓存层需要用到，用来失效一些资源
+	RemoveWriteCallback(*write_callback.Entry)   // 取消注册
 }

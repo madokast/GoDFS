@@ -13,10 +13,10 @@ import (
 func (dfs *Impl) CreateFile(path string, size int64) error {
 	dfs.distributedLock.WLock()
 	defer dfs.distributedLock.WUnlock()
-	return dfs.createFileUnlock(path, size)
+	return dfs.CreateFileUnlock(path, size)
 }
 
-func (dfs *Impl) createFileUnlock(path string, size int64) error {
+func (dfs *Impl) CreateFileUnlock(path string, size int64) error {
 	var errList []error
 	for _, n := range dfs.HashDistribute(path, dfs.replicaNum) {
 		err := n.CreateFile(path, size)
@@ -34,10 +34,10 @@ func (dfs *Impl) createFileUnlock(path string, size int64) error {
 func (dfs *Impl) Delete(path string) error {
 	dfs.distributedLock.WLock()
 	defer dfs.distributedLock.WUnlock()
-	return dfs.deleteUnlock(path)
+	return dfs.DeleteUnlock(path)
 }
 
-func (dfs *Impl) deleteUnlock(path string) error {
+func (dfs *Impl) DeleteUnlock(path string) error {
 	var errList []error
 	for _, n := range dfs.HashDistribute(path, dfs.replicaNum) {
 		err := n.Delete(path)
@@ -54,13 +54,13 @@ func (dfs *Impl) deleteUnlock(path string) error {
 
 func (dfs *Impl) Write(path string, offset int64, data []byte) error {
 	dfs.distributedLock.WLock()
-	err := dfs.writeUnlock(path, offset, data)
+	err := dfs.WriteUnlock(path, offset, data)
 	dfs.distributedLock.WUnlock()
 	if err != nil {
 		// refresh and try again
 		dfs.refreshAliveNodesAndHandCircleUnLock()
 		dfs.distributedLock.WLock()
-		err = dfs.writeUnlock(path, offset, data)
+		err = dfs.WriteUnlock(path, offset, data)
 		dfs.distributedLock.WUnlock()
 		if err != nil {
 			return err
@@ -69,7 +69,7 @@ func (dfs *Impl) Write(path string, offset int64, data []byte) error {
 	return nil
 }
 
-func (dfs *Impl) writeUnlock(path string, offset int64, data []byte) error {
+func (dfs *Impl) WriteUnlock(path string, offset int64, data []byte) error {
 	var errList []error
 	for _, n := range dfs.HashDistribute(path, dfs.replicaNum) {
 		err := n.Write(path, offset, data)

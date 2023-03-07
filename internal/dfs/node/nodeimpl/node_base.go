@@ -5,7 +5,7 @@ import (
 	"github.com/madokast/GoDFS/internal/dfs/dfile"
 	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/dfs/node/write_callback"
-	"github.com/madokast/GoDFS/internal/fs"
+	write_callback2 "github.com/madokast/GoDFS/internal/fs/write_callback"
 	"github.com/madokast/GoDFS/internal/web"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
@@ -14,13 +14,13 @@ import (
 )
 
 type Impl struct {
-	ip               string
-	port             uint16
-	rootDir          string
-	router           map[string]web.HandleFunc
-	closed           bool // rpc 服务是否关闭。一般用于测试
-	localService     bool // 是否为本地 rpc，完成一些本地回调
-	fs.WriteCallBack      // 写操作监听回调
+	ip                            string
+	port                          uint16
+	rootDir                       string
+	router                        map[string]web.HandleFunc
+	closed                        bool // rpc 服务是否关闭。一般用于测试
+	localService                  bool // 是否为本地 rpc，完成一些本地回调
+	write_callback2.WriteCallBack      // 写操作监听回调
 }
 
 func New(conf *node.Info) node.Node {
@@ -145,3 +145,11 @@ func (n *Impl) ListenAndServeGo() {
 func (n *Impl) Close() {
 	n.closed = true
 }
+
+func (n *Impl) RLock() {}
+
+func (n *Impl) RUnlock() {}
+
+func (n *Impl) WLock() {}
+
+func (n *Impl) WUnlock() {}

@@ -43,3 +43,9 @@ func (n *Impl) DoListFiles(w http.ResponseWriter, r *http.Request) {
 		return &listFilesRsp{Files: files, Dirs: dirs}, err
 	})
 }
+
+/*================ 有锁无锁相同 ======================*/
+
+func (n *Impl) ListFilesUnlock(path string) (files []string, dirs []string, err error) {
+	return n.ListFiles(path)
+}

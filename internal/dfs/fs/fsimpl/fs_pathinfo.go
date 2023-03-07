@@ -11,10 +11,10 @@ import (
 func (dfs *Impl) Stat(path string) (fs.Meta, error) {
 	dfs.distributedLock.RLock()
 	defer dfs.distributedLock.RUnlock()
-	return dfs.statUnlock(path)
+	return dfs.StatUnlock(path)
 }
 
-func (dfs *Impl) statUnlock(path string) (fs.Meta, error) {
+func (dfs *Impl) StatUnlock(path string) (fs.Meta, error) {
 	var errList []error
 	var meta fs.Meta
 	for _, n := range dfs.aliveNodes {
@@ -40,10 +40,10 @@ func (dfs *Impl) statUnlock(path string) (fs.Meta, error) {
 func (dfs *Impl) Exist(path string) (bool, error) {
 	dfs.distributedLock.RLock()
 	defer dfs.distributedLock.RUnlock()
-	return dfs.existUnlock(path)
+	return dfs.ExistUnlock(path)
 }
 
-func (dfs *Impl) existUnlock(path string) (bool, error) {
+func (dfs *Impl) ExistUnlock(path string) (bool, error) {
 	var existNodes []node.Node
 	var unExistNodes []node.Node
 	var errList []error

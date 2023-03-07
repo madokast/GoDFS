@@ -3,6 +3,7 @@ package node
 import (
 	"github.com/madokast/GoDFS/internal/dfs/dfile"
 	"github.com/madokast/GoDFS/internal/fs"
+	"github.com/madokast/GoDFS/internal/fs/write_callback"
 	"net/http"
 )
 
@@ -29,18 +30,22 @@ type Info struct {
 
 // Node 节点信息
 type Node interface {
+	fs.BaseFS // 发送信息到该节点处理
 	info
-	fileIO
+	doFileIO
 	fileOP
 	doFileOP
 	sync
-	fs.WriteCallBack
+	write_callback.WriteCallBack
 	ListenAndServeGo()                                // 启动 node 的 rpc 服务
 	ServeHTTP(w http.ResponseWriter, r *http.Request) // 实现 http.Handler 接口
 	Close()                                           // node rpc 服务下线，一般只用于测试
 }
 
 type sync interface {
+	Ping() bool // 检查 node 是否存活
+	DoPing(w http.ResponseWriter, r *http.Request)
+
 	Sync(src Node, file string) error // 从 src 同步文件到 this
 	DoSync(w http.ResponseWriter, r *http.Request)
 }
@@ -54,29 +59,16 @@ type info interface {
 	Key() string
 	Location() *dfile.Location
 	IsLocalService() bool // 是否为本地 rpc，完成一些本地回调
-
-	Ping() bool // 检查 node 是否存活
-	DoPing(w http.ResponseWriter, r *http.Request)
 }
 
-// nodeFileIO 发送信息到该节点处理
-type fileIO interface {
-	Read(path string, offset, length int64) ([]byte, error) // 节点文件读取
-	Write(path string, offset int64, data []byte) error     // 节点文件写入
-
+type doFileIO interface {
 	DoRead(w http.ResponseWriter, r *http.Request)
 	DoWrite(w http.ResponseWriter, r *http.Request)
 }
 
 // nodeFileOP 发送信息到该节点处理
 type fileOP interface {
-	CreateFile(path string, size int64) error                         // 创建文件，指定文件大小，后期无法改变
-	ListFiles(path string) (files []string, dirs []string, err error) // 列出文件夹下所有文件/路径
-	Delete(path string) error                                         // 删除文件、文件夹，如果文件夹不空则级联删除。路径不存在不会报错
-	Stat(path string) (fs.Meta, error)                                // 获取文件元信息
-	Exist(path string) (bool, error)                                  // 判断文件是否存在
-	MD5(file string) (string, error)                                  // 文件 MD5
-
+	MD5(file string) (string, error)                    // 文件 MD5
 	ForAllFile(path string, consumer func(file string)) // 目录下文件深度遍历。如果传入的是文件，则直接传给 consumer
 }
 

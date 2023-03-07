@@ -5,8 +5,8 @@ import (
 	"github.com/madokast/GoDFS/internal/dfs/node"
 	"github.com/madokast/GoDFS/internal/dfs/node/nodeimpl"
 	"github.com/madokast/GoDFS/internal/dlock/locallock"
-	fs2 "github.com/madokast/GoDFS/internal/fs"
 	"github.com/madokast/GoDFS/internal/fs/lfs"
+	fs2 "github.com/madokast/GoDFS/internal/fs/write_callback"
 	"github.com/madokast/GoDFS/utils"
 	"github.com/madokast/GoDFS/utils/httputils"
 	"github.com/madokast/GoDFS/utils/logger"
@@ -37,7 +37,7 @@ func TestImpl_RegisterWriteCallback(t *testing.T) {
 		path := "/table/col01.dat"
 		utils.PanicIfErr(DFS.CreateFile(path, 16))
 
-		DFS.RegisterWriteCallback(&fs2.WriteCallBackObj{
+		DFS.RegisterWriteCallback(&fs2.Entry{
 			FileName: path,
 			Offset:   2,
 			Length:   3,
@@ -81,7 +81,7 @@ func TestImpl_RegisterWriteCallback2(t *testing.T) {
 		path := "/table/col01.dat"
 		utils.PanicIfErr(DFS.CreateFile(path, 16))
 
-		DFS.RegisterWriteCallback(&fs2.WriteCallBackObj{
+		DFS.RegisterWriteCallback(&fs2.Entry{
 			FileName: path,
 			Offset:   2,
 			Length:   3,
@@ -90,7 +90,7 @@ func TestImpl_RegisterWriteCallback2(t *testing.T) {
 			},
 		})
 
-		DFS2.RegisterWriteCallback(&fs2.WriteCallBackObj{
+		DFS2.RegisterWriteCallback(&fs2.Entry{
 			FileName: path,
 			Offset:   2,
 			Length:   5,

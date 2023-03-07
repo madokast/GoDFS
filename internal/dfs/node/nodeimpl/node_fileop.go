@@ -112,3 +112,12 @@ func (n *Impl) ForAllFile(path string, consumer func(file string)) {
 	}
 
 }
+
+/*=============== 有锁无锁相同 ==================*/
+
+func (n *Impl) CreateFileUnlock(path string, size int64) error {
+	return n.CreateFile(path, size)
+}
+func (n *Impl) DeleteUnlock(path string) error {
+	return n.Delete(path)
+}

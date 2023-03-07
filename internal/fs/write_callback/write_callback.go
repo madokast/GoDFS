@@ -1,4 +1,4 @@
-package fs
+package write_callback
 
 import "net/http"
 
@@ -10,23 +10,27 @@ import "net/http"
 可以手动删除注册的回调信息 RemoveWriteCallback
 */
 
-type WriteCallBackObj struct {
+type Entry struct {
 	FileName string
 	Offset   int64
 	Length   int64
 	Callback func()
 }
 
+type Register interface {
+	RegisterWriteCallback(*Entry) // 注册文件修改通知回调。缓存层需要用到，用来失效一些资源
+	RemoveWriteCallback(*Entry)   // 取消注册
+}
+
 type WriteCallBack interface {
-	RegisterWriteCallback(*WriteCallBackObj)                   // 注册文件修改通知回调。缓存层需要用到，用来失效一些资源
-	RemoveWriteCallback(*WriteCallBackObj)                     // 取消注册
+	Register
 	WriteCallback(fileName string, offset, length int64) error // 向 this 节点发送回调 WriteCallBack 请求
 	DoWriteCallback(w http.ResponseWriter, r *http.Request)    // 处理 this 节点的回调 WriteCallBack 请求
 }
 
 // Intersect 范围是否相交
 // 原理：发生相交，则覆盖范围肯定小于 length + obj.Length
-func (obj *WriteCallBackObj) Intersect(offset, length int64) bool {
+func (obj *Entry) Intersect(offset, length int64) bool {
 	end := offset + length - 1
 	objEnd := obj.Offset + obj.Length - 1
 

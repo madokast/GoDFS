@@ -7,6 +7,12 @@ import (
 )
 
 func (dfs *Impl) ListFiles(path string) (files []string, dirs []string, err error) {
+	dfs.distributedLock.RLock()
+	defer dfs.distributedLock.RUnlock()
+	return dfs.ListFilesUnlock(path)
+}
+
+func (dfs *Impl) ListFilesUnlock(path string) (files []string, dirs []string, err error) {
 	var errList []error
 	allFiles := map[string]struct{}{}
 	allDirs := map[string]struct{}{}
@@ -41,6 +47,12 @@ func (dfs *Impl) ListFiles(path string) (files []string, dirs []string, err erro
 }
 
 func (dfs *Impl) Read(path string, offset, length int64) ([]byte, error) {
+	dfs.distributedLock.RLock()
+	defer dfs.distributedLock.RUnlock()
+	return dfs.ReadUnlock(path, offset, length)
+}
+
+func (dfs *Impl) ReadUnlock(path string, offset, length int64) ([]byte, error) {
 	var errList []error
 	var read []byte
 	for _, n := range dfs.HashDistribute(path, dfs.replicaNum) {

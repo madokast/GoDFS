@@ -24,7 +24,7 @@ type existRsp struct {
 	Exist bool `json:"exist,omitempty"`
 }
 
-func (n *Impl) Stat(path string) (fs.Meta, error) {
+func (n *Impl) StatUnlock(path string) (fs.Meta, error) {
 	ret := web.Response[*dfile.MetaImpl]{}
 	err := httputils.PostJson(n.ip, n.port, node.StatPathApi, &statReq{Path: path}, &ret)
 	if err != nil {
@@ -36,7 +36,7 @@ func (n *Impl) Stat(path string) (fs.Meta, error) {
 	return ret.Data, nil
 }
 
-func (n *Impl) Exist(path string) (bool, error) {
+func (n *Impl) ExistUnlock(path string) (bool, error) {
 	ret := web.Response[*existRsp]{}
 	err := httputils.PostJson(n.ip, n.port, node.ExistPathApi, &existReq{Path: path}, &ret)
 	if err != nil {
@@ -75,4 +75,14 @@ func (n *Impl) DoExist(w http.ResponseWriter, r *http.Request) {
 		existLocal := lfs.ExistLocal(path.Join(n.rootDir, req.Path))
 		return &existRsp{Exist: existLocal}, nil
 	})
+}
+
+/*==================== 有锁无锁相同 =======================*/
+
+func (n *Impl) Stat(path string) (fs.Meta, error) {
+	return n.StatUnlock(path)
+}
+
+func (n *Impl) Exist(path string) (bool, error) {
+	return n.ExistUnlock(path)
 }

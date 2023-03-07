@@ -26,7 +26,7 @@ type writeReq struct {
 	Bytes  []byte
 }
 
-func (n *Impl) Read(path string, offset, length int64) ([]byte, error) {
+func (n *Impl) ReadUnlock(path string, offset, length int64) ([]byte, error) {
 	ret := web.Response[*readRsp]{}
 	err := httputils.PostGob(n.ip, n.port, node.ReadFileApi, &readReq{Path: path, Offset: offset, Length: length}, &ret)
 	if err != nil {
@@ -38,7 +38,7 @@ func (n *Impl) Read(path string, offset, length int64) ([]byte, error) {
 	return ret.Data.Bytes, nil
 }
 
-func (n *Impl) Write(path string, offset int64, data []byte) error {
+func (n *Impl) WriteUnlock(path string, offset int64, data []byte) error {
 	ret := web.Response[*web.NullResponse]{}
 	err := httputils.PostGob(n.ip, n.port, node.WriteFileApi, &writeReq{Path: path, Offset: offset, Bytes: data}, &ret)
 	if err != nil {
@@ -65,4 +65,18 @@ func (n *Impl) DoWrite(w http.ResponseWriter, r *http.Request) {
 		err := lfs.WriteLocal(path.Join(n.rootDir, req.Path), req.Offset, req.Bytes)
 		return &web.NullResponse{}, err
 	})
+}
+
+/*====================== node 没有锁，所以有无锁相同 ============================*/
+
+func (n *Impl) Read(path string, offset, length int64) ([]byte, error) {
+	n.RLock()
+	defer n.RUnlock()
+	return n.ReadUnlock(path, offset, length)
+}
+
+func (n *Impl) Write(path string, offset int64, data []byte) error {
+	n.WLock()
+	defer n.WUnlock()
+	return n.WriteUnlock(path, offset, data)
 }
